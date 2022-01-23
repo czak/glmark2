@@ -5,7 +5,8 @@ option('flavors', type : 'array',
            'wayland-gl',
            'wayland-glesv2',
            'x11-gl',
-           'x11-glesv2'
+           'x11-glesv2',
+           'webos-glesv2',
         ],
         value : []
 )

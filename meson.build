@@ -37,6 +37,7 @@ flavors_str = ', '.join(flavors)
 need_x11 = flavors_str.contains('x11-')
 need_drm = flavors_str.contains('drm-')
 need_wayland = flavors_str.contains('wayland-')
+need_webos = flavors_str.contains('webos-')
 need_gl = flavors_str.contains('-gl')
 need_glesv2 = flavors_str.contains('-glesv2')
 need_egl = need_drm or need_wayland or need_glesv2
@@ -58,6 +59,13 @@ if need_wayland
     wayland_egl_dep = dependency('wayland-egl')
     wayland_protocols_dep = dependency('wayland-protocols', version : '>= 1.12')
     wayland_scanner_dep = dependency('wayland-scanner', native: true)
+endif
+
+if need_webos
+    wayland_client_dep = dependency('wayland-client')
+    wayland_cursor_dep = dependency('wayland-cursor')
+    wayland_egl_dep = dependency('wayland-egl')
+    wayland_webos_client_dep = dependency('wayland-webos-client')
 endif
 
 subdir('src')

@@ -140,6 +140,22 @@ else
     native_x11_dep = declare_dependency()
 endif
 
+if need_webos
+    native_webos_lib = static_library(
+        'native-webos',
+        'native-state-webos.cpp',
+        dependencies: [wayland_client_dep, wayland_cursor_dep, wayland_egl_dep, wayland_webos_client_dep],
+        )
+
+    native_webos_dep = declare_dependency(
+        link_with: native_webos_lib,
+        dependencies: [wayland_client_dep, wayland_cursor_dep, wayland_egl_dep, wayland_webos_client_dep],
+        compile_args: ['-DGLMARK2_USE_WEBOS', '-DWL_EGL_PLATFORM'],
+        )
+else
+    native_webos_dep = declare_dependency()
+endif
+
 if need_gl
     gl_gl_lib = static_library(
         'gl-gl',
@@ -241,6 +257,7 @@ flavor_info = {
   'wayland-glesv2' : ['glmark2-es2-wayland', native_wayland_dep, gl_glesv2_dep, wsi_egl_dep],
   'x11-gl' : ['glmark2', native_x11_dep, gl_gl_dep, wsi_glx_dep],
   'x11-glesv2' : ['glmark2-es2', native_x11_dep, gl_glesv2_dep, wsi_egl_dep],
+  'webos-glesv2' : ['glmark2-es2-webos', native_webos_dep, gl_glesv2_dep, wsi_egl_dep],
 }
 
 foreach flavor : flavors
