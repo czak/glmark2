@@ -46,6 +46,8 @@
 #include "native-state-dispmanx.h"
 #elif GLMARK2_USE_WIN32
 #include "native-state-win32.h"
+#elif GLMARK2_USE_WEBOS
+#include "native-state-webos.h"
 #endif
 
 #if GLMARK2_USE_EGL
@@ -177,6 +179,8 @@ main(int argc, char *argv[])
     NativeStateDispmanx native_state;
 #elif GLMARK2_USE_WIN32
     NativeStateWin32 native_state;
+#elif GLMARK2_USE_WEBOS
+    NativeStateWebos native_state;
 #endif
 
 #if GLMARK2_USE_EGL
