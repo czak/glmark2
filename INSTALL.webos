@@ -1,0 +1,52 @@
+This fork implements src/native-state-webos.cpp and defines a new flavor 'webos-glesv2'
+which allows it to run on webOS.
+
+I am not affiliated with glmark2 authors, all copyrights belong to them.
+You are running this at your own risk, I guarantee nothing.
+
+Prerequisites
+-------------
+
+To build for webos, you will need:
+
+* webOS NDK
+* a Meson cross file for webOS, see e.g: https://gist.github.com/czak/499ffd9bc54b6e8eadbe15623d8d99ef
+
+Note: I've only tested with the unofficial NDK build from https://github.com/webosbrew/meta-lg-webos-ndk
+
+Building
+--------
+
+$ git clone https://github.com/czak/glmark2.git
+$ cd glmark2
+$ meson setup build -Dflavors=webos-glesv2 --cross-file webos --buildtype release
+$ meson compile -C build
+$ cd webos
+$ make package
+$ ares-install com.github.glmark2.glmark2_0.0.1_arm.ipk
+
+Running
+-------
+Run like you would any other app from the home launcher. The benchmark runs all scenes once, then quits.
+
+Benchmark scores are written to stdout, so if you want to see them, run from ssh:
+
+# XDG_RUNTIME_DIR=/tmp/xdg /usr/bin/jailer -t native_devmode -i com.github.glmark2.glmark2 -p /media/developer/apps/usr/palm/applications/com.github.glmark2.glmark2 /media/developer/apps/usr/palm/applications/com.github.glmark2.glmark2/glmark2-es2-webos
+
+Ctrl-C quits the program.
+
+By default glmark2's framebuffer is 800x600. To run at full resolution, you can specify a command line argument, e.g.:
+
+# XDG_RUNTIME_DIR=/tmp/xdg /usr/bin/jailer -t native_devmode -i com.github.glmark2.glmark2 -p /media/developer/apps/usr/palm/applications/com.github.glmark2.glmark2 /media/developer/apps/usr/palm/applications/com.github.glmark2.glmark2/glmark2-es2-webos -s 1920x1080
+
+Other useful arguments:
+
+* `-b ':show-fps=true'` - show live FPS counter
+* `-b 'ideas:show-fps=true'` - select only the 'ideas' scene and show the FPS counter
+
+Caveats
+-------
+1. My benchmarks are capped to 120 FPS, so I don't think eglSwapInterval can be set to 0 here. Maybe someone knows what is missing.
+2. libstdc++ is older on my device that the NDK one. To get the project to run, I had to
+    * copy over the libstdc++.so.6.0.22 from NDK to /media/developer/apps/usr/palm/applications/com.github.glmark2.glmark2/lib
+    * symlink it as /media/developer/apps/usr/palm/applications/com.github.glmark2.glmark2/lib/libstdc++.so.6 -> listdc++.so.6.0.22
