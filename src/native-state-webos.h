@@ -3,6 +3,7 @@
 
 #include <wayland-client.h>
 #include <wayland-egl.h>
+#include <wayland-webos-shell-client-protocol.h>
 
 #include "native-state.h"
 
@@ -37,11 +38,15 @@ private:
         wl_display *display;
         wl_registry *registry;
         wl_compositor *compositor;
+        wl_shell *shell;
+        wl_webos_shell *webos_shell;
     } *display_;
 
     struct my_window {
         WindowProperties properties;
         struct wl_surface *surface;
+        struct wl_shell_surface *shell_surface;
+        struct wl_webos_shell_surface *webos_shell_surface;
         struct wl_egl_window *native;
     } *window_;
 

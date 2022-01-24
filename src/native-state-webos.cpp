@@ -1,5 +1,6 @@
 #include "native-state-webos.h"
 
+#include <cstdlib>
 #include <cstring>
 #include <csignal>
 
@@ -18,7 +19,17 @@ NativeStateWebos::registry_handle_global(void *data, struct wl_registry *registr
         that->display_->compositor =
                 static_cast<struct wl_compositor *>(
                     wl_registry_bind(registry,
-                                     id, &wl_compositor_interface, std::min(version, 4U)));
+                                     id, &wl_compositor_interface, 1));
+    } else if (strcmp(interface, "wl_shell") == 0) {
+        that->display_->shell =
+                static_cast<struct wl_shell *>(
+                    wl_registry_bind(registry,
+                                     id, &wl_shell_interface, 1));
+    } else if (strcmp(interface, "wl_webos_shell") == 0) {
+        that->display_->webos_shell =
+                static_cast<struct wl_webos_shell *>(
+                    wl_registry_bind(registry,
+                                     id, &wl_webos_shell_interface, 1));
     }
 }
 
@@ -28,6 +39,8 @@ NativeStateWebos::registry_handle_global_remove(void * /*data*/,
                                                 uint32_t /*name*/)
 {
 }
+
+volatile bool NativeStateWebos::should_quit_ = false;
 
 NativeStateWebos::NativeStateWebos() : display_(0), window_(0)
 {
@@ -80,9 +93,7 @@ NativeStateWebos::init_display()
     }
 
     display_->registry = wl_display_get_registry(display_->display);
-
     wl_registry_add_listener(display_->registry, &registry_listener_, this);
-
     wl_display_roundtrip(display_->display);
 
     return true;
@@ -91,18 +102,40 @@ NativeStateWebos::init_display()
 void*
 NativeStateWebos::display()
 {
-    return 0;
+    return static_cast<void *>(display_->display);
 }
 
 bool
 NativeStateWebos::create_window(WindowProperties const& properties)
 {
+    window_ = new struct my_window();
+    window_->properties = properties;
+
+    window_->surface = wl_compositor_create_surface(display_->compositor);
+
+    window_->shell_surface = wl_shell_get_shell_surface(display_->shell, window_->surface);
+    wl_shell_surface_set_toplevel(window_->shell_surface);
+
+    window_->webos_shell_surface =
+      wl_webos_shell_get_shell_surface(display_->webos_shell, window_->surface);
+    wl_webos_shell_surface_set_property(window_->webos_shell_surface,
+        "appId", (getenv("APP_ID") ? getenv("APP_ID") : "com.github.glmark2.glmark2"));
+    wl_webos_shell_surface_set_property(window_->webos_shell_surface,
+        "displayAffinity", (getenv("DISPLAY_ID") ? getenv("DISPLAY_ID") : "0"));
+
+    window_->native = wl_egl_window_create(window_->surface, properties.width, properties.height);
+
     return true;
 }
 
 void*
 NativeStateWebos::window(WindowProperties &properties)
 {
+    if (window_) {
+        properties = window_->properties;
+        return window_->native;
+    }
+
     return 0;
 }
 
@@ -114,7 +147,7 @@ NativeStateWebos::visible(bool /*v*/)
 bool
 NativeStateWebos::should_quit()
 {
-    return false;
+    return should_quit_;
 }
 
 void
