@@ -1,0 +1,9 @@
+{
+  "id": "com.github.glmark2.glmark2",
+  "version": "0.0.1",
+  "vendor": "glmark2",
+  "type": "native",
+  "main": "glmark2-es2-webos",
+  "title": "glmark2",
+  "icon": "icon.png"
+}
